@@ -1,9 +1,50 @@
-//read in samples.json file
 d3.json("data/samples.json").then((data)=> {
     console.log(data);
+    var metadata = data.metadata;
 
-    //2. create a horizontal bar chart with a dropdown menu to display the top 10 OTUS found
-    var data = data;
+function buildData(sampleData){
+    console.log(sampleData);
+    //clear the table
+
+
+}
+
+function buildChart(sampleChartData){
+    console.log(sampleChartData);
+
+
+}
+
+
+// handleclick button
+function optionChanged(dropdownValue){
+    buildData(dropdownValue);
+    buildChart(dropdownValue);
+
+}
+
+function init(){
+    //read in dataset
+
+    //find the names
+
+    //poulate dropdown
+
+    //find the first sample
+
+
+
+
+    buildData(first);
+    buildChart(first);
+}
+
+//initialize functions
+init();
+
+
+
+
 
     //sort sample values
     var sortedSample= data.samples.sort(function(a,b){
@@ -15,30 +56,24 @@ d3.json("data/samples.json").then((data)=> {
     //reverse array
     top10= top10.reverse();
 
-
-
-
-    //3. create a bubble chart that displays each sample
-
-
-    //4. display the sample metadata, i.e. an individual's demographic info
-
-
-
-    //5. display each key-value pair from the metadata JSON object somewhere on the page
-
-    //6.create function when dropdown menu item selected
-    //d3.select("#selDataset").on("change", updatePlotly);
-    
-    //function updatePlotly(){
-        //var dropdownMenu= d3.select("#selDataset").node();
-        //var dataset = dropdownMenu.value;
-        //choose a test subject here? "id"
-        //values for bar chart are "sample_values"
-        //use "otu_ids" for bar chart labels
-    //}
-
-
+    var trace1={
+        x: top10.map(row => row.),
+        y: top10.map(row => row.),
+        text: data.map(row => row.),
+        type: "bar",
+        orientation: "h"
+    };
+    var chartData = [trace1];
+    var layout= {
+        title: "Top 10 OTUs found",
+        margin: {
+            l: 100,
+            r: 100,
+            t: 100,
+            b: 100
+        }
+    };
+    Plotly.newPlot("bar", chartData, layout);
 
 
 });
