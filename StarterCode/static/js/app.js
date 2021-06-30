@@ -1,20 +1,35 @@
 
-//create arrays///////////////////////////////////
-var sample_values=[];
-var otu_ids=[];
-var otu_labels=[];
-var ids=[];
-
 //buildData function///////////////////////////////
 function buildData(sampleData){
     //read in data
     d3.json("data/samples.json").then((data)=> {
-        console.log(data);
-        console.log(sampleData);
+        //console.log(data);
         var metadata = data.metadata;
         
         //clear the table
-        
+        //select variable to update plots with
+        var dropdown = d3.select("#selDataset").node();
+        var inputValue= dropdown.value;
+        console.log(inputValue)
+
+        //select new value from dropdown
+        selectData= data.samples.filter(sample => sample.id ===inputValue);
+        console.log(selectData);
+        //slice the top 10 and reverse the sample_values, otu_ids, and otu_labels for the default
+        sampleVals= selectData.sample_values;
+        sampleVals= sampleVals.slice(0,10).reverse();
+        OTUids= selectData.otu_ids;
+        OTUids= OTUids.slice(0,10).reverse().map(OTUids=> `OTU ${OTUids}`);
+        OTUlabels= selectData.otu_labels;
+        OTUlabels= OTUlabels.slice(0,10).reverse();
+
+        //restyle charts
+        Plotly.restyle("bar", "x", [sampleVals]);
+        Plotly.restyle("bar", "y", [OTUids]);
+        Plotly.restyle("bar", "text", [otu_ids]);
+
+
+
     });
 }
 
@@ -22,7 +37,7 @@ function buildData(sampleData){
 function buildChart(sampleChartData){
     //read in data
     d3.json("data/samples.json").then((data)=> {
-        console.log(sampleChartData);
+        //console.log(sampleChartData);
 
         //set first sample as the default for the chart to build
         buildDefault= data.samples[0];
@@ -33,6 +48,14 @@ function buildChart(sampleChartData){
         defaultOTUid= defaultOTUid.slice(0,10).reverse();
         defaultOTULabel= buildDefault.otu_labels;
         defaultOTULabel= defaultOTULabel.slice(0,10).reverse();
+
+        //display default sample in demographic info chart
+        defaultDemoInfo= data.metadata[0];
+        console.log(defaultDemoInfo);
+
+        Object.entries(defaultDemoInfo).forEach(
+            ([key,value]) => d3.select("#sample-metadata").append("p").text(`${key}: ${value}`)
+        );
 
         //use sample values for bar chart,
         var trace1={
@@ -47,10 +70,10 @@ function buildChart(sampleChartData){
         var layout= {
             title: "Top 10 OTUs found",
             margin: {
-                l: 50,
-                r: 50,
-                t: 50,
-                b: 50
+                l: 100,
+                r: 100,
+                t: 100,
+                b: 100
             }
         };
         Plotly.newPlot("bar", chartData, layout);
@@ -77,7 +100,7 @@ function init(){
         ids.forEach(function(id){
             dropdown.append("option").text(id).property("value");
         });
-            
+        
         //find the first sample
         const firstId = ids[0];
         //run build functions
