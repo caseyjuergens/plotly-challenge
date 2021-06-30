@@ -1,5 +1,5 @@
 
-//create arrays
+//create arrays///////////////////////////////////
 var sample_values=[];
 var otu_ids=[];
 var otu_labels=[];
@@ -7,37 +7,39 @@ var ids=[];
 
 //buildData function///////////////////////////////
 function buildData(sampleData){
+    //read in data
     d3.json("data/samples.json").then((data)=> {
         console.log(data);
         console.log(sampleData);
         var metadata = data.metadata;
-            
+        
         //clear the table
         
     });
 }
 
-
-
 //buildChart function/////////////////////////////////
 function buildChart(sampleChartData){
+    //read in data
     d3.json("data/samples.json").then((data)=> {
-        console.log(data);
         console.log(sampleChartData);
-        //sort sample values
-        var sample_values= data.samples.sort(function(a,b){
-            return parseInt(b.sample_values) - parseInt(a.sample_values);
-        });
-            
-        //slice the first 10
-        var sample_values = sample_values.slice(0,10);
-        //reverse array
-        sample_values= sample_values.reverse();
-            
+
+        //set first sample as the default for the chart to build
+        buildDefault= data.samples[0];
+        //slice the top 10 and reverse the sample_values, otu_ids, and otu_labels for the default
+        defaultSampVal= buildDefault.sample_values;
+        defaultSampVal= defaultSampVal.slice(0,10).reverse();
+        defaultOTUid= buildDefault.otu_ids;
+        defaultOTUid= defaultOTUid.slice(0,10).reverse();
+        defaultOTULabel= buildDefault.otu_labels;
+        defaultOTULabel= defaultOTULabel.slice(0,10).reverse();
+
+        //use sample values for bar chart,
         var trace1={
-            x: sample_values.map(row => row.otu_ids),
-            y: sample_values.map(row => row.sample_values),
-            text: sample_values.map(row => row.otu_labels),
+            x: defaultSampVal,
+            y: defaultOTUid.map(defaultOTUid=> `OTU ${defaultOTUid}`),
+            text: defaultOTULabel,
+            name: buildDefault,
             type: "bar",
             orientation: "h"
         };
@@ -45,17 +47,16 @@ function buildChart(sampleChartData){
         var layout= {
             title: "Top 10 OTUs found",
             margin: {
-                l: 100,
-                r: 100,
-                t: 100,
-                b: 100
+                l: 50,
+                r: 50,
+                t: 50,
+                b: 50
             }
         };
         Plotly.newPlot("bar", chartData, layout);
 
     });
 }
-
 
 // handleclick button//////////////////////// -done
 function optionChanged(dropdownValue){
@@ -66,6 +67,7 @@ function optionChanged(dropdownValue){
 
 // init function /////////////////////////////
 function init(){
+    //read in data
     d3.json("data/samples.json").then((data)=> {
         //find the names
         var ids = data.names;
@@ -78,6 +80,7 @@ function init(){
             
         //find the first sample
         const firstId = ids[0];
+        //run build functions
         buildChart(firstId);
         buildData(firstId);
     });
@@ -85,4 +88,3 @@ function init(){
 
 //initialize functions//////////////////////////
 init();
-
