@@ -3,32 +3,22 @@
 function buildData(sampleData){
     //read in data
     d3.json("data/samples.json").then((data)=> {
-        //console.log(data);
+        // create variable for metadata
         var metadata = data.metadata;
-        
-        //clear the table
-        //select variable to update plots with
-        var dropdown = d3.select("#selDataset").node();
-        var inputValue= dropdown.value;
-        console.log(inputValue)
 
-        //select new value from dropdown
-        selectData= data.samples.filter(sample => sample.id ===inputValue);
-        console.log(selectData);
-        //slice the top 10 and reverse the sample_values, otu_ids, and otu_labels for the default
-        sampleVals= selectData.sample_values;
-        sampleVals= sampleVals.slice(0,10).reverse();
-        OTUids= selectData.otu_ids;
-        OTUids= OTUids.slice(0,10).reverse().map(OTUids=> `OTU ${OTUids}`);
-        OTUlabels= selectData.otu_labels;
-        OTUlabels= OTUlabels.slice(0,10).reverse();
+        //filter metadata for demo info
+        selectData= metadata.filter(d => d.id == sampleData);
+        result= selectData[0];
+        console.log(result);
 
-        //restyle charts
-        Plotly.restyle("bar", "x", [sampleVals]);
-        Plotly.restyle("bar", "y", [OTUids]);
-        Plotly.restyle("bar", "text", [otu_ids]);
+        //select demo panel, clear panel
+        var panel= d3.select('#sample-metadata');
+        panel.html("");
 
-
+        // apply demo info to panel 
+        Object.entries(result).forEach(
+        ([key,value]) => d3.select("#sample-metadata").append("p").text(`${key}: ${value}`)
+        );
 
     });
 }
@@ -40,22 +30,19 @@ function buildChart(sampleChartData){
         //console.log(sampleChartData);
 
         //set first sample as the default for the chart to build
-        buildDefault= data.samples[0];
+        buildDefault= data.samples;
+        
+        //filter for default info
+        selectData= buildDefault.filter(d => d.id == sampleChartData);
+        results= selectData[0];
+
         //slice the top 10 and reverse the sample_values, otu_ids, and otu_labels for the default
-        defaultSampVal= buildDefault.sample_values;
+        defaultSampVal= results.sample_values;
         defaultSampVal= defaultSampVal.slice(0,10).reverse();
-        defaultOTUid= buildDefault.otu_ids;
+        defaultOTUid= results.otu_ids;
         defaultOTUid= defaultOTUid.slice(0,10).reverse();
-        defaultOTULabel= buildDefault.otu_labels;
+        defaultOTULabel= results.otu_labels;
         defaultOTULabel= defaultOTULabel.slice(0,10).reverse();
-
-        //display default sample in demographic info chart
-        defaultDemoInfo= data.metadata[0];
-        console.log(defaultDemoInfo);
-
-        Object.entries(defaultDemoInfo).forEach(
-            ([key,value]) => d3.select("#sample-metadata").append("p").text(`${key}: ${value}`)
-        );
 
         //use sample values for bar chart,
         var trace1={
@@ -68,7 +55,7 @@ function buildChart(sampleChartData){
         };
         var chartData = [trace1];
         var layout= {
-            title: "Top 10 OTUs found",
+            title: "Top 10 Bacteria Cultures found",
             margin: {
                 l: 100,
                 r: 100,
@@ -76,7 +63,31 @@ function buildChart(sampleChartData){
                 b: 100
             }
         };
-        Plotly.newPlot("bar", chartData, layout);
+        var config ={responsive: true};
+        Plotly.newPlot("bar", chartData, layout, config);
+
+        //use sample values for bubble chart
+        var trace2 = {
+            x: defaultOTUid.map(defaultOTUid=> `OTU ${defaultOTUid}`),
+            y: defaultSampVal,
+            mode: 'markers',
+            marker: {
+            size:defaultSampVal,
+            color: defaultOTUid,
+            colorscale: "Viridis"
+            }
+        };
+        
+        var data2 = [trace2];
+        
+        var layout2 = {
+            title: 'Bacteria Cultures Per Sample',
+            showlegend: false,
+            height: 600,
+            width: 600
+        };
+        
+        Plotly.newPlot('bubble', data2, layout2, config);
 
     });
 }
